@@ -2,7 +2,7 @@ services:
   configsvr:
     image: dh-mirror.gitverse.ru/mongo:latest
     container_name: configsvr
-    entrypoint: [ "/bin/sh", "/scripts/configsvr.sh" ]
+    entrypoint: [ "/bin/bash", "/scripts/configsvr.sh" ]
     volumes:
       - mongodb_cluster_config_data:/data/db
       - ./scripts:/scripts
@@ -19,7 +19,7 @@ services:
   shard01:
     image: dh-mirror.gitverse.ru/mongo:latest
     container_name: shard01
-    entrypoint: [ "/bin/sh", "/scripts/shard01.sh" ]
+    entrypoint: [ "/bin/bash", "/scripts/shard01.sh" ]
     volumes:
       - mongodb_cluster_shard01_data:/data/db
       - ./scripts:/scripts
@@ -36,7 +36,7 @@ services:
   shard02:
     image: dh-mirror.gitverse.ru/mongo:latest
     container_name: shard02
-    entrypoint: [ "/bin/sh", "/scripts/shard02.sh" ]
+    entrypoint: [ "/bin/bash", "/scripts/shard02.sh" ]
     volumes:
       - mongodb_cluster_shard02_data:/data/db
       - ./scripts:/scripts
@@ -60,7 +60,7 @@ services:
         condition: service_healthy
       shard02:
         condition: service_healthy
-    entrypoint: [ "/bin/sh", "/scripts/mongos.sh" ]
+    entrypoint: [ "/bin/bash", "/scripts/mongos.sh" ]
     volumes:
       - ./scripts:/scripts
     ports:
