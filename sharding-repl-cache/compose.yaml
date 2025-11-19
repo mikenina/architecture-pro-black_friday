@@ -1,7 +1,6 @@
 services:
   configsvr-a:
     image: dh-mirror.gitverse.ru/mongo:latest
-    container_name: configsvr-a
     entrypoint: [ "/bin/bash", "/scripts/configsvr.sh" ]
     volumes:
       - mongodb_cluster_config_a:/data/db
@@ -23,7 +22,6 @@ services:
 
   configsvr-b:
     image: dh-mirror.gitverse.ru/mongo:latest
-    container_name: configsvr-b
     entrypoint: [ "/bin/bash", "/scripts/configsvr.sh" ]
     volumes:
       - mongodb_cluster_config_b:/data/db
@@ -38,7 +36,6 @@ services:
 
   configsvr-c:
     image: dh-mirror.gitverse.ru/mongo:latest
-    container_name: configsvr-c
     entrypoint: [ "/bin/bash", "/scripts/configsvr.sh" ]
     volumes:
       - mongodb_cluster_config_c:/data/db
@@ -53,7 +50,6 @@ services:
 
   shard01-a:
     image: dh-mirror.gitverse.ru/mongo:latest
-    container_name: shard01-a
     entrypoint: [ "/bin/bash", "/scripts/shard.sh" ]
     volumes:
       - mongodb_cluster_shard01_a_data:/data/db
@@ -75,7 +71,6 @@ services:
 
   shard01-b:
     image: dh-mirror.gitverse.ru/mongo:latest
-    container_name: shard01-b
     entrypoint: [ "/bin/bash", "/scripts/shard.sh" ]
     volumes:
       - mongodb_cluster_shard01_b_data:/data/db
@@ -90,7 +85,6 @@ services:
 
   shard01-c:
     image: dh-mirror.gitverse.ru/mongo:latest
-    container_name: shard01-c
     entrypoint: [ "/bin/bash", "/scripts/shard.sh" ]
     volumes:
       - mongodb_cluster_shard01_c_data:/data/db
@@ -105,7 +99,6 @@ services:
 
   shard02-a:
     image: dh-mirror.gitverse.ru/mongo:latest
-    container_name: shard02-a
     entrypoint: [ "/bin/bash", "/scripts/shard.sh" ]
     volumes:
       - mongodb_cluster_shard02_a_data:/data/db
@@ -127,7 +120,6 @@ services:
 
   shard02-b:
     image: dh-mirror.gitverse.ru/mongo:latest
-    container_name: shard02-b
     entrypoint: [ "/bin/bash", "/scripts/shard.sh" ]
     volumes:
       - mongodb_cluster_shard02_b_data:/data/db
@@ -142,7 +134,6 @@ services:
 
   shard02-c:
     image: dh-mirror.gitverse.ru/mongo:latest
-    container_name: shard02-c
     entrypoint: [ "/bin/bash", "/scripts/shard.sh" ]
     volumes:
       - mongodb_cluster_shard02_c_data:/data/db
@@ -157,7 +148,6 @@ services:
 
   mongos:
     image: dh-mirror.gitverse.ru/mongo:latest
-    container_name: mongos
     depends_on:
       - configsvr-a
       - configsvr-b
@@ -189,7 +179,6 @@ services:
 
   redis:
     image: redis:latest
-    container_name: redis
     ports:
       - "6379:6379"
     volumes:
@@ -198,7 +187,6 @@ services:
       - ${MONGO_NETWORK}
 
   pymongo_api:
-    container_name: pymongo_api
     build:
       context: api_app
       dockerfile: Dockerfile
