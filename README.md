@@ -2,7 +2,9 @@
 
 ## Как запустить
 
-Запускаем mongodb и приложение
+```shell
+cd ./sharding-repl-cache
+```
 
 ```shell
 docker compose up -d
@@ -15,6 +17,38 @@ docker compose up -d
 ```
 
 ## Как проверить
+
+```shell
+./scripts/test.sh
+```
+
+Вы должны увидеть что-то такое:
+```shell
+./scripts/test.sh
+rs-shard01 [direct: secondary] test> switched to db somedb
+rs-shard01 [direct: secondary] somedb> >>> Count documents on DB shard01:
+
+rs-shard01 [direct: secondary] somedb> 1016
+rs-shard01 [direct: secondary] somedb> >>> Count replica on DB shard01:
+
+rs-shard01 [direct: secondary] somedb> 3
+rs-shard01 [direct: secondary] somedb> rs-shard02 [direct: secondary] test> switched to db somedb
+rs-shard02 [direct: secondary] somedb> >>> Count documents on DB shard02:
+
+rs-shard02 [direct: secondary] somedb> 984
+rs-shard02 [direct: secondary] somedb> >>> Count replica on DB shard01:
+
+rs-shard02 [direct: secondary] somedb> 3
+rs-shard02 [direct: secondary] somedb> [direct: mongos] test> switched to db somedb
+[direct: mongos] somedb> >>> Total number of documents:
+
+[direct: mongos] somedb> 2000
+
+ === Проверка FastAPI Cache ===
+Запрос #1: 1.030966174 секунд
+Запрос #2: .009197275 секунд
+Запрос #3: .011141598 секунд
+```
 
 ### Если вы запускаете проект на локальной машине
 
