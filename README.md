@@ -3,23 +3,21 @@
 ## Как запустить
 
 ```shell
-cd ./sharding-repl-cache
-```
-
-```shell
-docker compose up -d
+docker compose \
+  -f ./sharding-repl-cache/compose.yaml \
+  up -d
 ```
 
 Заполняем mongodb данными
 
 ```shell
-./scripts/mongo-init.sh
+./sharding-repl-cache/scripts/mongo-init.sh
 ```
 
 ## Как проверить
 
 ```shell
-./scripts/test.sh
+./sharding-repl-cache/scripts/test.sh
 ```
 
 Вы должны увидеть что-то такое:
