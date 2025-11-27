@@ -5,6 +5,7 @@
 - коллекция = таблица;
 - документ = строка;
 - на уровне бд реализована возможность шардинга по хешу, по диапазону;
+- CP: Consistency - Partition Tolerance
 - бд предоставляет набор атомарных операций чтение-апдейт;
 - конкурентное обновление: запросы выстраиваются в очередь.
 
@@ -35,8 +36,8 @@ entity Product {
     * name: text
     * category: text
     * price: number
-    * geo_leftovers: array
-    attributes: json
+    * geo_leftovers: array --[{"zone":"Moscow", "qty": 10}]
+    attributes: json --{"color":"red", "size": 5}
 }
 ```
 **Профиль нагрузки:**
@@ -108,7 +109,7 @@ entity Order {
     --
     * user_id: number
     * created_at: timestamp
-    * products: array
+    * products: array --[{"product_id": 123, "qty": 1, "price": 500}]
     * status: text
     * total_sum: number
     * geo: text
@@ -149,7 +150,7 @@ entity Cart {
     --
     user_id: number
     session_id: number
-    * items: array
+    * items: array --[{"product_id": 123, "qty": 1}]
     * status: text
     * created_at: timestamp
     * expires_at: timestamp
