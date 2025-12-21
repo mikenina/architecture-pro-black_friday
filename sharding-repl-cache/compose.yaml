@@ -1,0 +1,220 @@
+services:
+  configsvr-a:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    entrypoint: [ "/bin/bash", "/scripts/configsvr.sh" ]
+    volumes:
+      - mongodb_cluster_config_a:/data/db
+      - ./scripts:/scripts
+    environment:
+      - RS_NAME=${CONFIG_RS}
+      - PORT=${CONFIG_PORT}
+      - HOST_A=${CONFIG_A_HOST}
+      - HOST_B=${CONFIG_B_HOST}
+      - HOST_C=${CONFIG_C_HOST}
+      - IS_PRIMARY_NODE=true
+    networks:
+      - ${MONGO_NETWORK}
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval \"db.adminCommand('ping')\" --port 27019"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  configsvr-b:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    entrypoint: [ "/bin/bash", "/scripts/configsvr.sh" ]
+    volumes:
+      - mongodb_cluster_config_b:/data/db
+      - ./scripts:/scripts
+    environment:
+      - RS_NAME=${CONFIG_RS}
+      - PORT=${CONFIG_PORT}
+    networks:
+      - ${MONGO_NETWORK}
+    depends_on:
+      - configsvr-a
+
+  configsvr-c:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    entrypoint: [ "/bin/bash", "/scripts/configsvr.sh" ]
+    volumes:
+      - mongodb_cluster_config_c:/data/db
+      - ./scripts:/scripts
+    environment:
+      - RS_NAME=${CONFIG_RS}
+      - PORT=${CONFIG_PORT}
+    networks:
+      - ${MONGO_NETWORK}
+    depends_on:
+      - configsvr-a
+
+  shard01-a:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    entrypoint: [ "/bin/bash", "/scripts/shard.sh" ]
+    volumes:
+      - mongodb_cluster_shard01_a_data:/data/db
+      - ./scripts:/scripts
+    environment:
+      - RS_NAME=${SHARD01_RS}
+      - PORT=${SHARD01_PORT}
+      - HOST_A=${SHARD01_A_HOST}
+      - HOST_B=${SHARD01_B_HOST}
+      - HOST_C=${SHARD01_C_HOST}
+      - IS_PRIMARY_NODE=true
+    networks:
+      - ${MONGO_NETWORK}
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval \"db.adminCommand('ping')\" --port 27018"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  shard01-b:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    entrypoint: [ "/bin/bash", "/scripts/shard.sh" ]
+    volumes:
+      - mongodb_cluster_shard01_b_data:/data/db
+      - ./scripts:/scripts
+    environment:
+      - RS_NAME=${SHARD01_RS}
+      - PORT=${SHARD01_PORT}
+    networks:
+      - ${MONGO_NETWORK}
+    depends_on:
+      - shard01-a
+
+  shard01-c:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    entrypoint: [ "/bin/bash", "/scripts/shard.sh" ]
+    volumes:
+      - mongodb_cluster_shard01_c_data:/data/db
+      - ./scripts:/scripts
+    environment:
+      - RS_NAME=${SHARD01_RS}
+      - PORT=${SHARD01_PORT}
+    networks:
+      - ${MONGO_NETWORK}
+    depends_on:
+      - shard01-a
+
+  shard02-a:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    entrypoint: [ "/bin/bash", "/scripts/shard.sh" ]
+    volumes:
+      - mongodb_cluster_shard02_a_data:/data/db
+      - ./scripts:/scripts
+    environment:
+      - RS_NAME=${SHARD02_RS}
+      - PORT=${SHARD02_PORT}
+      - HOST_A=${SHARD02_A_HOST}
+      - HOST_B=${SHARD02_B_HOST}
+      - HOST_C=${SHARD02_C_HOST}
+      - IS_PRIMARY_NODE=true
+    networks:
+      - ${MONGO_NETWORK}
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval \"db.adminCommand('ping')\" --port 27017"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  shard02-b:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    entrypoint: [ "/bin/bash", "/scripts/shard.sh" ]
+    volumes:
+      - mongodb_cluster_shard02_b_data:/data/db
+      - ./scripts:/scripts
+    environment:
+      - RS_NAME=${SHARD02_RS}
+      - PORT=${SHARD02_PORT}
+    networks:
+      - ${MONGO_NETWORK}
+    depends_on:
+      - shard02-a
+
+  shard02-c:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    entrypoint: [ "/bin/bash", "/scripts/shard.sh" ]
+    volumes:
+      - mongodb_cluster_shard02_c_data:/data/db
+      - ./scripts:/scripts
+    environment:
+      - RS_NAME=${SHARD02_RS}
+      - PORT=${SHARD02_PORT}
+    networks:
+      - ${MONGO_NETWORK}
+    depends_on:
+      - shard02-a
+
+  mongos:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    depends_on:
+      - configsvr-a
+      - configsvr-b
+      - configsvr-c
+      - shard01-a
+      - shard01-b
+      - shard01-c
+      - shard02-a
+      - shard02-b
+      - shard02-c
+    entrypoint: [ "/bin/bash", "/scripts/mongos.sh" ]
+    volumes:
+      - ./scripts:/scripts
+    environment:
+      - MONGOS_PORT=${MONGOS_PORT}
+      - CONFIG_RS=${CONFIG_RS}
+      - CONFIG_MEMBERS=${CONFIG_A_HOST}:${CONFIG_PORT},${CONFIG_B_HOST}:${CONFIG_PORT},${CONFIG_C_HOST}:${CONFIG_PORT}
+      - SHARD1_RS=${SHARD01_RS}
+      - SHARD2_RS=${SHARD02_RS}
+      - SHARD1_MEMBERS=${SHARD01_A_HOST}:${SHARD01_PORT},${SHARD01_B_HOST}:${SHARD01_PORT},${SHARD01_C_HOST}:${SHARD01_PORT}
+      - SHARD2_MEMBERS=${SHARD02_A_HOST}:${SHARD02_PORT},${SHARD02_B_HOST}:${SHARD02_PORT},${SHARD02_C_HOST}:${SHARD02_PORT}
+    networks:
+      - ${MONGO_NETWORK}
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval \"db.adminCommand('ping')\" --port 27020"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ${MONGO_NETWORK}
+
+  pymongo_api:
+    build:
+      context: api_app
+      dockerfile: Dockerfile
+    depends_on:
+      mongos:
+        condition: service_healthy
+    ports:
+      - 8080:8080
+    networks:
+      - ${MONGO_NETWORK}
+    environment:
+      MONGODB_URL: "mongodb://mongos:${MONGOS_PORT}"
+      MONGODB_DATABASE_NAME: "somedb"
+      REDIS_URL: "redis://redis:6379"
+
+networks:
+  mongo-net:
+    driver: bridge
+
+volumes:
+  mongodb_cluster_config_a:
+  mongodb_cluster_config_b:
+  mongodb_cluster_config_c:
+  mongodb_cluster_shard01_a_data:
+  mongodb_cluster_shard01_b_data:
+  mongodb_cluster_shard01_c_data:
+  mongodb_cluster_shard02_a_data:
+  mongodb_cluster_shard02_b_data:
+  mongodb_cluster_shard02_c_data:
+  redis_data:
+

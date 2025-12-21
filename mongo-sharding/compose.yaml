@@ -1,0 +1,100 @@
+services:
+  configsvr:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    container_name: configsvr
+    entrypoint: [ "/bin/bash", "/scripts/configsvr.sh" ]
+    volumes:
+      - mongodb_cluster_config_data:/data/db
+      - ./scripts:/scripts
+    ports:
+      - "27019:27019"
+    networks:
+      - mongo-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')", "--port", "27019" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  shard01:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    container_name: shard01
+    entrypoint: [ "/bin/bash", "/scripts/shard01.sh" ]
+    volumes:
+      - mongodb_cluster_shard01_data:/data/db
+      - ./scripts:/scripts
+    ports:
+      - "27018:27018"
+    networks:
+      - mongo-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')", "--port", "27018" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  shard02:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    container_name: shard02
+    entrypoint: [ "/bin/bash", "/scripts/shard02.sh" ]
+    volumes:
+      - mongodb_cluster_shard02_data:/data/db
+      - ./scripts:/scripts
+    ports:
+      - "27017:27017"
+    networks:
+      - mongo-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')", "--port", "27017" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  mongos:
+    image: dh-mirror.gitverse.ru/mongo:latest
+    container_name: mongos
+    depends_on:
+      configsvr:
+        condition: service_healthy
+      shard01:
+        condition: service_healthy
+      shard02:
+        condition: service_healthy
+    entrypoint: [ "/bin/bash", "/scripts/mongos.sh" ]
+    volumes:
+      - ./scripts:/scripts
+    ports:
+      - "27020:27020"
+    networks:
+      - mongo-net
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')", "--port", "27020" ]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  pymongo_api:
+    container_name: pymongo_api
+    build: 
+      context: api_app
+      dockerfile: Dockerfile
+    depends_on:
+      mongos:
+        condition: service_healthy
+    ports:
+      - 8080:8080
+    networks:
+      - mongo-net
+    environment:
+      MONGODB_URL: "mongodb://mongos:27020"
+      MONGODB_DATABASE_NAME: "somedb"
+
+networks:
+  mongo-net:
+    driver: bridge
+
+volumes:
+  mongodb_cluster_config_data:
+  mongodb_cluster_shard01_data:
+  mongodb_cluster_shard02_data:
+

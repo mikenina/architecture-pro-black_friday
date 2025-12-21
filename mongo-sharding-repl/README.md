@@ -1,28 +1,23 @@
-# Повышение отказоустойчивости онлайн-магазина «Мобильный мир»
+# pymongo-api
 
-## Схема шардирование, репликация и кеширование
-![](./schemas/yandex_practicum_architecture-pro-black_friday-final.png)
+## Как запустить
 
-## pymongo-api
-
-### Как запустить
+Запускаем mongodb и приложение
 
 ```shell
-docker compose \
-  -f ./sharding-repl-cache/compose.yaml \
-  up -d
+docker compose up -d
 ```
 
 Заполняем mongodb данными
 
 ```shell
-./sharding-repl-cache/scripts/mongo-init.sh
+./scripts/mongo-init.sh
 ```
 
-### Как проверить
+## Как проверить
 
 ```shell
-./sharding-repl-cache/scripts/test.sh
+./scripts/test.sh
 ```
 
 Вы должны увидеть что-то такое:
@@ -46,18 +41,13 @@ rs-shard02 [direct: secondary] somedb> [direct: mongos] test> switched to db som
 [direct: mongos] somedb> >>> Total number of documents:
 
 [direct: mongos] somedb> 2000
-
- === Проверка FastAPI Cache ===
-Запрос #1: 1.030966174 секунд
-Запрос #2: .009197275 секунд
-Запрос #3: .011141598 секунд
 ```
 
-#### Если вы запускаете проект на локальной машине
+### Если вы запускаете проект на локальной машине
 
 Откройте в браузере http://localhost:8080
 
-#### Если вы запускаете проект на предоставленной виртуальной машине
+### Если вы запускаете проект на предоставленной виртуальной машине
 
 Узнать белый ip виртуальной машины
 
@@ -67,6 +57,6 @@ curl --silent http://ifconfig.me
 
 Откройте в браузере http://<ip виртуальной машины>:8080
 
-### Доступные эндпоинты
+## Доступные эндпоинты
 
 Список доступных эндпоинтов, swagger http://<ip виртуальной машины>:8080/docs

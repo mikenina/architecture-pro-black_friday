@@ -1,0 +1,34 @@
+@startuml
+entity Product {
+    * product_id: number <<generated>>
+    --
+    * name: text
+    * category: text
+    * price: number
+    * geo_leftovers: array --[{"zone":"Moscow", "qty": 10}]
+    attributes: json --{"color":"red", "size": 5}
+}
+
+entity Order {
+    * order_id: number <<generated>>
+    --
+    * user_id: number
+    * created_at: timestamp
+    * products: array --[{"product_id": 123, "qty": 1, "price": 500}]
+    * status: text
+    * total_sum: number
+    * geo: text
+}
+
+entity Cart {
+    * cart_id: number <<generated>>
+    --
+    user_id: number
+    session_id: number
+    * items: array --[{"product_id": 123, "qty": 1}]
+    * status: text
+    * created_at: timestamp
+    * expires_at: timestamp
+    updated_at: timestamp
+}
+@enduml
